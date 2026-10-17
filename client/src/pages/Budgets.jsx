@@ -143,6 +143,9 @@ function Budgets() {
 
       <Banner>{error}</Banner>
 
+      {/* Keeps the heading outline h1 → h2 → h3 (the cards use h3). */}
+      <h2 className="sr-only">Budget categories</h2>
+
       {items.length > 0 && (
         <p className="muted" style={{ marginBottom: 16 }}>
           {items.length} categor{items.length === 1 ? "y" : "ies"} this month — budgeted{" "}

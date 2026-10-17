@@ -118,6 +118,9 @@ function Goals() {
 
       <Banner>{error}</Banner>
 
+      {/* Keeps the heading outline h1 → h2 → h3 (the cards use h3). */}
+      <h2 className="sr-only">Savings goals</h2>
+
       <div className="goals-grid">
         {items.map((g) => {
           const target = Number(g.targetAmount);
