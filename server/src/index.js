@@ -17,6 +17,11 @@ process.on("uncaughtException", (err) => {
 });
 
 const app = express();
+app.disable("x-powered-by");
+
+// Behind Vercel's proxy, so req.ip must come from X-Forwarded-For; the auth
+// rate limiters key off it.
+app.set("trust proxy", 1);
 
 // CLIENT_ORIGIN may be a comma-separated list, e.g.
 // "https://my-app.vercel.app,http://localhost:5173"
@@ -34,10 +39,16 @@ app.use(cors({ origin: allowedOrigins }));
 app.set("etag", false);
 app.use((req, res, next) => {
   res.set("Cache-Control", "no-store");
+  // Baseline hardening. Deliberately no Cross-Origin-Opener-Policy: it breaks
+  // the Google Sign-In popup flow.
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Referrer-Policy", "no-referrer");
+  res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   next();
 });
 
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 app.get("/api/categories", (req, res) => res.json({ items: CATEGORIES }));

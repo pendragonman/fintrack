@@ -66,6 +66,19 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
+  async function forgotPassword(email) {
+    await api.post("/auth/forgot-password", {
+      email,
+      origin: window.location.origin,
+    });
+  }
+
+  async function resetPassword(token, password) {
+    const res = await api.post("/auth/reset-password", { token, password });
+    localStorage.setItem("token", res.data.token);
+    setUser(res.data.user);
+  }
+
   async function updateUser(fields) {
     const res = await api.patch("/auth/me", fields);
     setUser(res.data.user);
@@ -88,6 +101,8 @@ export function AuthProvider({ children }) {
         resendCode,
         loginWithGoogle,
         logout,
+        forgotPassword,
+        resetPassword,
         updateUser,
         deleteAccount,
       }}

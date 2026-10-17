@@ -61,6 +61,9 @@ All routes are served under `/api`:
 | `POST` | `/api/auth/login` | Log in and receive a JWT |
 | `POST` | `/api/auth/google` | Sign in with a Google ID token |
 | `POST` | `/api/auth/verify-email` | Confirm the emailed verification code |
+| `POST` | `/api/auth/resend-code` | Re-send the verification code |
+| `POST` | `/api/auth/forgot-password` | Email a password-reset link (always returns `200`) |
+| `POST` | `/api/auth/reset-password` | Set a new password from a reset token and sign in |
 | `PATCH` | `/api/auth/me` | Update the signed-in user |
 | `GET/POST/PUT/DELETE` | `/api/transactions` | Manage transactions (`/export` returns CSV) |
 | `GET/POST/DELETE` | `/api/budgets` | Manage monthly category budgets |

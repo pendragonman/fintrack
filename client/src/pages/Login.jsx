@@ -82,6 +82,10 @@ function Login() {
         </button>
 
         <p className="auth-switch">
+          <Link to="/forgot-password">Forgot your password?</Link>
+        </p>
+
+        <p className="auth-switch">
           No account? <Link to="/signup">Sign up</Link>
         </p>
       </form>
