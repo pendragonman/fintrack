@@ -9,12 +9,13 @@ A full-stack personal finance tracker for recording income and expenses, setting
 
 ## Features
 
-- **Authentication** — email/password sign-up with email verification codes, plus Google sign-in
-- **Transactions** — add, edit, and delete income/expense records, filter them, and export to CSV
+- **Authentication** — email/password sign-up with email verification codes, password reset by email, Google sign-in, per-account lockout after repeated failed logins
+- **Accounts** — track balances per bank/cash/card/wallet account and transfer between them without skewing income or spending
+- **Transactions** — add, edit, and delete income/expense records, attach them to an account, filter them, and export to CSV
 - **Budgets** — set a monthly limit per category and track spending against it
 - **Savings goals** — create goals with target amounts and dates, and contribute toward them
 - **Reports & dashboard** — spending trends and category breakdowns rendered with Recharts
-- **Settings** — update your name, password, and preferred currency
+- **Settings** — update your name and preferred currency, or delete your account
 - **Theme** — light/dark mode with the choice persisted locally
 
 ## Tech Stack
@@ -42,11 +43,11 @@ A full-stack personal finance tracker for recording income and expenses, setting
 │   └── vercel.json
 └── server/                  # Express + Prisma API
     ├── api/index.js          # Vercel serverless entry point
-    ├── prisma/schema.prisma  # Database schema
+    ├── prisma/schema.prisma  # Database schema (User, Account, Transaction, Budget, SavingsGoal)
     ├── src/
-    │   ├── routes/           # auth, transactions, budgets, goals, reports
+    │   ├── routes/           # auth, accounts, transactions, budgets, goals, reports
     │   ├── middleware/       # JWT auth
-    │   ├── lib/              # prisma client, mailer, categories, asyncHandler
+    │   ├── lib/              # prisma client, mailer, rate limiting, categories, asyncHandler
     │   └── index.js          # Express app
     └── vercel.json
 ```
@@ -65,7 +66,9 @@ All routes are served under `/api`:
 | `POST` | `/api/auth/forgot-password` | Email a password-reset link (always returns `200`) |
 | `POST` | `/api/auth/reset-password` | Set a new password from a reset token and sign in |
 | `PATCH` | `/api/auth/me` | Update the signed-in user |
-| `GET/POST/PUT/DELETE` | `/api/transactions` | Manage transactions (`/export` returns CSV) |
+| `GET/POST/PUT/DELETE` | `/api/accounts` | Manage accounts (balances are computed from their transactions) |
+| `POST` | `/api/accounts/transfer` | Move money between two accounts as a linked pair |
+| `GET/POST/PUT/DELETE` | `/api/transactions` | Manage transactions (`/export` returns CSV, `?accountId=` filters) |
 | `GET/POST/DELETE` | `/api/budgets` | Manage monthly category budgets |
 | `GET/POST/DELETE` | `/api/goals` | Manage savings goals (`/:id/contribute`) |
 | `GET` | `/api/reports/trend` | Spending trend data for charts |

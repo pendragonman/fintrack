@@ -16,19 +16,24 @@ router.get(
 
     const [incomeAgg, expenseAgg, allTimeIncome, allTimeExpense, goals] = await Promise.all([
       prisma.transaction.aggregate({
-        where: { userId: req.userId, type: "INCOME", date: { gte: start, lt: end } },
+        where: {
+          userId: req.userId,
+          type: "INCOME",
+          date: { gte: start, lt: end },
+          transferGroupId: null,
+        },
         _sum: { amount: true },
       }),
       prisma.transaction.aggregate({
-        where: { userId: req.userId, type: "EXPENSE", date: { gte: start, lt: end } },
+        where: { userId: req.userId, type: "EXPENSE", date: { gte: start, lt: end }, transferGroupId: null },
         _sum: { amount: true },
       }),
       prisma.transaction.aggregate({
-        where: { userId: req.userId, type: "INCOME" },
+        where: { userId: req.userId, type: "INCOME", transferGroupId: null },
         _sum: { amount: true },
       }),
       prisma.transaction.aggregate({
-        where: { userId: req.userId, type: "EXPENSE" },
+        where: { userId: req.userId, type: "EXPENSE", transferGroupId: null },
         _sum: { amount: true },
       }),
       prisma.savingsGoal.aggregate({
@@ -65,7 +70,7 @@ router.get(
 
     const rows = await prisma.transaction.groupBy({
       by: ["category"],
-      where: { userId: req.userId, type, date: { gte: start, lt: end } },
+      where: { userId: req.userId, type, date: { gte: start, lt: end }, transferGroupId: null },
       _sum: { amount: true },
       orderBy: { _sum: { amount: "desc" } },
     });
@@ -84,7 +89,7 @@ router.get(
     const end = new Date(year + 1, 0, 1);
 
     const transactions = await prisma.transaction.findMany({
-      where: { userId: req.userId, date: { gte: start, lt: end } },
+      where: { userId: req.userId, date: { gte: start, lt: end }, transferGroupId: null },
       select: { type: true, amount: true, date: true },
     });
 

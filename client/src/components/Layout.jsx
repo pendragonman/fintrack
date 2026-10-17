@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
 import {
   IconOverview,
+  IconWallet,
   IconTransactions,
   IconBudget,
   IconGoals,
@@ -13,6 +14,7 @@ import {
 
 const links = [
   { to: "/", label: "Dashboard", end: true, Icon: IconOverview },
+  { to: "/accounts", label: "Accounts", Icon: IconWallet },
   { to: "/transactions", label: "Transactions", Icon: IconTransactions },
   { to: "/budgets", label: "Budgets", Icon: IconBudget },
   { to: "/goals", label: "Goals", Icon: IconGoals },

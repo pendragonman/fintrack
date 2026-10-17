@@ -9,6 +9,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+import Accounts from "./pages/Accounts";
 import Transactions from "./pages/Transactions";
 import Budgets from "./pages/Budgets";
 import Goals from "./pages/Goals";
@@ -37,6 +38,7 @@ function App() {
               }
             >
               <Route index element={<Dashboard />} />
+              <Route path="accounts" element={<Accounts />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="budgets" element={<Budgets />} />
               <Route path="goals" element={<Goals />} />

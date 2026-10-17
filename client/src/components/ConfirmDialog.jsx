@@ -3,6 +3,7 @@ import Modal from "./Modal";
 function ConfirmDialog({
   title,
   message,
+  children,
   confirmLabel = "Confirm",
   tone = "danger",
   busy = false,
@@ -11,7 +12,11 @@ function ConfirmDialog({
 }) {
   return (
     <Modal title={title} onClose={busy ? undefined : onCancel} closeOnBackdrop>
-      <p className="modal-copy">{message}</p>
+      {children ? (
+        <div className="modal-copy">{children}</div>
+      ) : (
+        <p className="modal-copy">{message}</p>
+      )}
       <div className="modal-actions">
         <button
           type="button"

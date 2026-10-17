@@ -25,6 +25,7 @@ const COLORS = ["#7c3aed", "#0d9488", "#d97706", "#a78bfa", "#2dd4bf", "#fbbf24"
 function Dashboard() {
   const { user } = useAuth();
   const [summary, setSummary] = useState(null);
+  const [accounts, setAccounts] = useState(null);
   const [byCategory, setByCategory] = useState([]);
   const [trend, setTrend] = useState([]);
   const [recent, setRecent] = useState([]);
@@ -42,10 +43,12 @@ function Dashboard() {
       api.get("/reports/by-category", { params: { month, year, type: "EXPENSE" } }),
       api.get("/reports/trend", { params: { year } }),
       api.get("/transactions", { params: { page: 1, pageSize: 5 } }),
+      api.get("/accounts"),
     ])
-      .then(([summaryRes, categoryRes, trendRes, recentRes]) => {
+      .then(([summaryRes, categoryRes, trendRes, recentRes, accountsRes]) => {
         if (cancelled) return;
         setSummary(summaryRes.data);
+        setAccounts(accountsRes.data);
         setByCategory(categoryRes.data.items);
         setTrend(
           trendRes.data.items.map((m) => ({
@@ -75,6 +78,11 @@ function Dashboard() {
   const topCategory = byCategory[0]?.category || "";
   const year = new Date().getFullYear();
 
+  // Once accounts exist, their balances are the truest "total balance".
+  const hasAccounts = Boolean(accounts?.items?.length);
+  const totalBalance = hasAccounts ? accounts.totalBalance : summary?.totalBalance;
+  const activeAccounts = (accounts?.items || []).filter((a) => !a.archived);
+
   // Shimmer only while the first load is in flight — a failed load shows a dash.
   const statsLoading = loading && !summary;
   const statClass = `stat-card-value${statsLoading ? " skeleton" : ""}`;
@@ -100,8 +108,10 @@ function Dashboard() {
           <span className="stat-card-icon">
             <IconWallet />
           </span>
-          <span className="stat-card-label">Total Balance</span>
-          <span className={statClass}>{statValue(summary?.totalBalance)}</span>
+          <span className="stat-card-label">
+            {hasAccounts ? "Total across accounts" : "Total Balance"}
+          </span>
+          <span className={statClass}>{statValue(totalBalance)}</span>
         </div>
         <div className="stat-card-lg stat-positive">
           <span className="stat-card-icon">
@@ -228,6 +238,42 @@ function Dashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
+
+      <div className="panel" style={{ marginTop: 24 }}>
+        <div className="panel-head">
+          <h2>Accounts</h2>
+          <Link className="link-arrow" to="/accounts">
+            {activeAccounts.length ? "Manage →" : "Set up accounts →"}
+          </Link>
+        </div>
+
+        {activeAccounts.length === 0 ? (
+          <p className="empty-state">
+            Track balances per bank, cash or wallet account, and move money between them without
+            skewing your reports.
+            <Link className="btn btn-primary" to="/accounts">
+              + Add an account
+            </Link>
+          </p>
+        ) : (
+          <ul className="activity-list">
+            {activeAccounts.map((account) => (
+              <li className="activity-item" key={account.id}>
+                <span className="activity-icon">
+                  <IconWallet width={16} height={16} />
+                </span>
+                <div className="activity-desc">
+                  <strong>{account.name}</strong>
+                  <span>{account.type.charAt(0) + account.type.slice(1).toLowerCase()}</span>
+                </div>
+                <span className={account.balance < 0 ? "amount-negative" : "amount-positive"}>
+                  {formatMoney(account.balance, currency)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="panel" style={{ marginTop: 24 }}>

@@ -24,6 +24,7 @@ async function withSpent(userId, budget) {
       type: "EXPENSE",
       category: budget.category,
       date: { gte: start, lt: end },
+      transferGroupId: null,
     },
     _sum: { amount: true },
   });

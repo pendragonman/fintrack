@@ -16,6 +16,7 @@ function emptyForm() {
     category: CATEGORIES[3],
     description: "",
     date: new Date().toISOString().slice(0, 10),
+    accountId: "",
   };
 }
 
@@ -29,7 +30,15 @@ function Transactions() {
   const [page, setPage] = useState(1);
   const pageSize = 15;
 
-  const [filters, setFilters] = useState({ type: "", category: "", search: "", from: "", to: "" });
+  const [filters, setFilters] = useState({
+    type: "",
+    category: "",
+    search: "",
+    from: "",
+    to: "",
+    accountId: "",
+  });
+  const [accounts, setAccounts] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
@@ -92,15 +101,31 @@ function Transactions() {
 
   const filtersActive = Object.values(filters).some(Boolean);
 
+  // The account picker is a convenience; the list still works without it.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get("/accounts")
+      .then((res) => {
+        if (!cancelled) setAccounts(res.data.items.filter((a) => !a.archived));
+      })
+      .catch(() => {
+        if (!cancelled) setAccounts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function clearFilters() {
     setSearch("");
-    setFilters({ type: "", category: "", search: "", from: "", to: "" });
+    setFilters({ type: "", category: "", search: "", from: "", to: "", accountId: "" });
     setPage(1);
   }
 
   function openCreate() {
     setEditingId(null);
-    setForm(emptyForm());
+    setForm({ ...emptyForm(), accountId: accounts[0]?.id || "" });
     setFormError("");
     setShowForm(true);
   }
@@ -113,6 +138,7 @@ function Transactions() {
       category: t.category,
       description: t.description || "",
       date: t.date.slice(0, 10),
+      accountId: t.accountId || "",
     });
     setFormError("");
     setShowForm(true);
@@ -122,7 +148,11 @@ function Transactions() {
     e.preventDefault();
     setFormError("");
     setSaving(true);
-    const payload = { ...form, amount: parseFloat(form.amount) };
+    const payload = {
+      ...form,
+      amount: parseFloat(form.amount),
+      accountId: form.accountId || null,
+    };
 
     try {
       if (editingId) {
@@ -144,8 +174,8 @@ function Transactions() {
   async function confirmDelete() {
     setDeleting(true);
     try {
-      await api.delete(`/transactions/${pendingDelete}`);
-      notify("Transaction deleted");
+      await api.delete(`/transactions/${pendingDelete.id}`);
+      notify(pendingDelete.transferGroupId ? "Transfer deleted" : "Transaction deleted");
       setPendingDelete(null);
       if (items.length === 1 && page > 1) setPage((p) => p - 1);
       else setReloadKey((k) => k + 1);
@@ -180,6 +210,7 @@ function Transactions() {
   const to = Math.min(page * pageSize, total);
 
   const money = (t) => `${t.type === "INCOME" ? "+" : "-"}${formatMoney(t.amount, currency)}`;
+  const accountLabel = (t) => t.account?.name || (accounts.length ? "Unassigned" : "");
 
   return (
     <div>
@@ -220,6 +251,22 @@ function Transactions() {
             </option>
           ))}
         </select>
+
+        {accounts.length > 0 && (
+          <select
+            aria-label="Filter by account"
+            value={filters.accountId}
+            onChange={(e) => updateFilter("accountId", e.target.value)}
+          >
+            <option value="">All accounts</option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+            <option value="unassigned">Unassigned</option>
+          </select>
+        )}
 
         <input
           type="date"
@@ -262,6 +309,7 @@ function Transactions() {
               <th scope="col">Date</th>
               <th scope="col">Category</th>
               <th scope="col">Description</th>
+              {accounts.length > 0 && <th scope="col">Account</th>}
               <th scope="col">Amount</th>
               <th scope="col">
                 <span className="sr-only">Actions</span>
@@ -272,22 +320,30 @@ function Transactions() {
             {items.map((t) => (
               <tr key={t.id}>
                 <td>{t.date.slice(0, 10)}</td>
-                <td>{t.category}</td>
+                <td>
+                  {t.category}
+                  {t.transferGroupId && <span className="badge badge-transfer">Transfer</span>}
+                </td>
                 <td>{t.description || "—"}</td>
+                {accounts.length > 0 && <td>{accountLabel(t)}</td>}
                 <td className={t.type === "INCOME" ? "amount-positive" : "amount-negative"}>
                   {money(t)}
                 </td>
                 <td>
                   <div className="row-actions">
-                    <button onClick={() => openEdit(t)}>Edit</button>
-                    <button onClick={() => setPendingDelete(t.id)}>Delete</button>
+                    {t.transferGroupId ? (
+                      <span className="muted">Transfer</span>
+                    ) : (
+                      <button onClick={() => openEdit(t)}>Edit</button>
+                    )}
+                    <button onClick={() => setPendingDelete(t)}>Delete</button>
                   </div>
                 </td>
               </tr>
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5}>
+                <td colSpan={accounts.length > 0 ? 6 : 5}>
                   <div className="empty-state">
                     {loading ? (
                       "Loading…"
@@ -324,7 +380,10 @@ function Transactions() {
                 <div>
                   <div className="tx-card-desc">{t.description || t.category}</div>
                   <div className="tx-card-meta">
-                    {t.category} · {t.date.slice(0, 10)}
+                    {t.category}
+                    {t.transferGroupId && <span className="badge badge-transfer">Transfer</span>} ·{" "}
+                    {t.date.slice(0, 10)}
+                    {accountLabel(t) ? ` · ${accountLabel(t)}` : ""}
                   </div>
                 </div>
                 <span className={t.type === "INCOME" ? "amount-positive" : "amount-negative"}>
@@ -332,10 +391,12 @@ function Transactions() {
                 </span>
               </div>
               <div className="tx-card-actions">
-                <button className="btn btn-secondary" onClick={() => openEdit(t)}>
-                  Edit
-                </button>
-                <button className="btn btn-secondary" onClick={() => setPendingDelete(t.id)}>
+                {!t.transferGroupId && (
+                  <button className="btn btn-secondary" onClick={() => openEdit(t)}>
+                    Edit
+                  </button>
+                )}
+                <button className="btn btn-secondary" onClick={() => setPendingDelete(t)}>
                   Delete
                 </button>
               </div>
@@ -410,6 +471,23 @@ function Transactions() {
               </select>
             </label>
 
+            {accounts.length > 0 && (
+              <label>
+                Account
+                <select
+                  value={form.accountId}
+                  onChange={(e) => setForm((f) => ({ ...f, accountId: e.target.value }))}
+                >
+                  <option value="">No account</option>
+                  {accounts.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+
             <label>
               Date
               <input
@@ -448,9 +526,13 @@ function Transactions() {
 
       {pendingDelete && (
         <ConfirmDialog
-          title="Delete transaction"
-          message="This transaction will be permanently removed. That can’t be undone."
-          confirmLabel="Delete"
+          title={pendingDelete.transferGroupId ? "Delete transfer" : "Delete transaction"}
+          message={
+            pendingDelete.transferGroupId
+              ? "Both legs of this transfer will be removed and the affected account balances will go back to what they were."
+              : "This transaction will be permanently removed. That can’t be undone."
+          }
+          confirmLabel={pendingDelete.transferGroupId ? "Delete transfer" : "Delete"}
           busy={deleting}
           onConfirm={confirmDelete}
           onCancel={() => setPendingDelete(null)}

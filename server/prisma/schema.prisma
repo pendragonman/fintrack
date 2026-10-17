@@ -14,6 +14,15 @@ enum TransactionType {
   EXPENSE
 }
 
+enum AccountType {
+  CASH
+  BANK
+  CARD
+  WALLET
+  SAVINGS
+  INVESTMENT
+}
+
 model User {
   id                     String    @id @default(uuid())
   email                  String    @unique
@@ -33,21 +42,45 @@ model User {
   transactions Transaction[]
   budgets      Budget[]
   goals        SavingsGoal[]
+  accounts     Account[]
+}
+
+model Account {
+  id             String      @id @default(uuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  type           AccountType @default(BANK)
+  openingBalance Decimal     @default(0) @db.Decimal(14, 2)
+  archived       Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+
+  transactions Transaction[]
+
+  @@unique([userId, name])
 }
 
 model Transaction {
-  id          String           @id @default(uuid())
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        TransactionType
-  amount      Decimal          @db.Decimal(14, 2)
-  category    String
-  description String?
-  date        DateTime
-  createdAt   DateTime         @default(now())
+  id              String           @id @default(uuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            TransactionType
+  amount          Decimal          @db.Decimal(14, 2)
+  category        String
+  description     String?
+  date            DateTime
+  accountId       String?
+  account         Account?         @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  // Both legs of a transfer share this id. Transfers are excluded from income,
+  // expense, budget and report totals because moving money between your own
+  // accounts is not spending.
+  transferGroupId String?
+  createdAt       DateTime         @default(now())
 
   @@index([userId, date])
   @@index([userId, category])
+  @@index([userId, accountId])
+  @@index([userId, transferGroupId])
 }
 
 model Budget {

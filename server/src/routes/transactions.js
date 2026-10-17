@@ -11,9 +11,12 @@ const transactionSchema = z.object({
   type: z.enum(["INCOME", "EXPENSE"]),
   amount: z.number().positive(),
   category: z.string().min(1).max(40),
-  description: z.string().max(200).optional().nullable(),
+  description: z.string().max(200).optional(),
   date: z.string().min(1),
+  accountId: z.string().min(1).nullish(),
 });
+
+const accountSelect = { select: { id: true, name: true } };
 
 function buildFilters(userId, query) {
   const where = { userId };
@@ -23,6 +26,15 @@ function buildFilters(userId, query) {
   }
   if (query.category) {
     where.category = query.category;
+  }
+  if (query.accountId) {
+    // "unassigned" surfaces the transactions that predate accounts.
+    where.accountId = query.accountId === "unassigned" ? null : query.accountId;
+  }
+  if (query.transfers === "only") {
+    where.transferGroupId = { not: null };
+  } else if (query.transfers === "exclude") {
+    where.transferGroupId = null;
   }
   if (query.from || query.to) {
     where.date = {};
@@ -34,6 +46,15 @@ function buildFilters(userId, query) {
   }
 
   return where;
+}
+
+// A transaction may only reference an account the caller owns.
+async function accountFor(userId, accountId) {
+  if (!accountId) return null;
+  return prisma.account.findFirst({
+    where: { id: accountId, userId },
+    select: { id: true },
+  });
 }
 
 router.get(
@@ -49,6 +70,7 @@ router.get(
         orderBy: { date: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
+        include: { account: { select: { id: true, name: true } } },
       }),
       prisma.transaction.count({ where }),
     ]);
@@ -61,15 +83,26 @@ router.get(
   "/export",
   asyncHandler(async (req, res) => {
     const where = buildFilters(req.userId, req.query);
-    const items = await prisma.transaction.findMany({ where, orderBy: { date: "desc" } });
+    const items = await prisma.transaction.findMany({
+      where,
+      orderBy: { date: "desc" },
+      include: { account: { select: { name: true } } },
+    });
 
-    const header = "Date,Type,Category,Description,Amount\n";
+    const cell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+    const header = "Date,Type,Category,Description,Account,Amount\n";
     const rows = items
-      .map((t) => {
-        const date = t.date.toISOString().slice(0, 10);
-        const description = (t.description || "").replace(/"/g, '""');
-        return `${date},${t.type},${t.category},"${description}",${t.amount}`;
-      })
+      .map((t) =>
+        [
+          t.date.toISOString().slice(0, 10),
+          t.type,
+          cell(t.category),
+          cell(t.description),
+          cell(t.account?.name || ""),
+          t.amount,
+        ].join(",")
+      )
       .join("\n");
 
     res.setHeader("Content-Type", "text/csv");
@@ -86,7 +119,16 @@ router.post(
       return res.status(400).json({ error: parsed.error.issues[0].message });
     }
 
-    const { type, amount, category, description, date } = parsed.data;
+    const { type, amount, category, description, date, accountId } = parsed.data;
+
+    if (accountId) {
+      const account = await prisma.account.findFirst({
+        where: { id: accountId, userId: req.userId },
+        select: { id: true },
+      });
+      if (!account) return res.status(404).json({ error: "Account not found" });
+    }
+
     const transaction = await prisma.transaction.create({
       data: {
         userId: req.userId,
@@ -95,7 +137,9 @@ router.post(
         category,
         description: description || null,
         date: new Date(date),
+        accountId: accountId || null,
       },
+      include: { account: { select: { id: true, name: true } } },
     });
 
     res.status(201).json({ transaction });
@@ -115,16 +159,33 @@ router.put(
       return res.status(404).json({ error: "Transaction not found" });
     }
 
-    const { type, amount, category, description, date } = parsed.data;
+    if (existing.transferGroupId) {
+      return res.status(400).json({
+        error: "This is one leg of a transfer. Delete the transfer and record a new one.",
+      });
+    }
+
+    const { type, amount, category, description, date, accountId } = parsed.data;
+
+    if (accountId) {
+      const account = await prisma.account.findFirst({
+        where: { id: accountId, userId: req.userId },
+        select: { id: true },
+      });
+      if (!account) return res.status(404).json({ error: "Account not found" });
+    }
+
     const transaction = await prisma.transaction.update({
-      where: { id: req.params.id },
+      where: { id: existing.id },
       data: {
         type,
         amount,
         category,
         description: description || null,
         date: new Date(date),
+        accountId: accountId || null,
       },
+      include: { account: { select: { id: true, name: true } } },
     });
 
     res.json({ transaction });
@@ -139,7 +200,15 @@ router.delete(
       return res.status(404).json({ error: "Transaction not found" });
     }
 
-    await prisma.transaction.delete({ where: { id: req.params.id } });
+    // Deleting either leg of a transfer removes both, so balances stay correct.
+    if (existing.transferGroupId) {
+      await prisma.transaction.deleteMany({
+        where: { userId: req.userId, transferGroupId: existing.transferGroupId },
+      });
+      return res.status(204).end();
+    }
+
+    await prisma.transaction.delete({ where: { id: existing.id } });
     res.status(204).end();
   })
 );

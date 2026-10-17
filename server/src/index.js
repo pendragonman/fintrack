@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
+import accountRoutes from "./routes/accounts.js";
 import transactionRoutes from "./routes/transactions.js";
 import budgetRoutes from "./routes/budgets.js";
 import goalRoutes from "./routes/goals.js";
@@ -54,6 +55,7 @@ app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 app.get("/api/categories", (req, res) => res.json({ items: CATEGORIES }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/accounts", accountRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/goals", goalRoutes);
