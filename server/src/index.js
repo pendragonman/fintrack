@@ -26,6 +26,17 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
   .filter(Boolean);
 
 app.use(cors({ origin: allowedOrigins }));
+
+// The API only returns per-user data, so responses must never be cached or
+// revalidated. Vercel's default `Cache-Control: public, max-age=0,
+// must-revalidate` plus an ETag makes browsers revalidate, and the resulting
+// 304 comes back without CORS headers, which browsers reject as a CORS error.
+app.set("etag", false);
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 app.use(express.json());
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
