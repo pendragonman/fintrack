@@ -150,6 +150,7 @@ function Dashboard() {
                       innerRadius={60}
                       outerRadius={100}
                       paddingAngle={2}
+                      rootTabIndex={-1}
                     >
                       {byCategory.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />

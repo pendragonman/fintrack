@@ -182,6 +182,7 @@ function Reports() {
                       dataKey="total"
                       nameKey="category"
                       outerRadius={110}
+                      rootTabIndex={-1}
                       label
                     >
                       {byCategory.map((_, i) => (
