@@ -101,6 +101,16 @@ export function IconPiggyBank(props) {
   );
 }
 
+export function IconImport(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 4v9" />
+      <path d="M8 9.5l4 4 4-4" />
+      <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+    </svg>
+  );
+}
+
 export function IconSettings(props) {
   return (
     <svg {...base(props)}>

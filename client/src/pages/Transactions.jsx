@@ -217,6 +217,9 @@ function Transactions() {
       <div className="page-header">
         <h1 className="page-title">Transactions</h1>
         <div className="page-header-actions">
+          <Link className="btn btn-secondary" to="/import">
+            Import CSV
+          </Link>
           <button className="btn btn-secondary" onClick={handleExport}>
             Export CSV
           </button>

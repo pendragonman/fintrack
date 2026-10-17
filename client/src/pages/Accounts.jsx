@@ -224,7 +224,7 @@ function Accounts() {
         <p className="account-hint">
           {data.unassignedCount} transaction{data.unassignedCount === 1 ? "" : "s"} not linked to
           an account yet.{" "}
-          <button type="button" className="link-btn" onClick={openCreate}>
+          <button type="button" className="link-inline" onClick={openCreate}>
             Link them to a new account
           </button>
         </p>

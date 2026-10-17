@@ -43,6 +43,7 @@ model User {
   budgets      Budget[]
   goals        SavingsGoal[]
   accounts     Account[]
+  rules        CategoryRule[]
 }
 
 model Account {
@@ -105,4 +106,19 @@ model SavingsGoal {
   currentAmount  Decimal   @default(0) @db.Decimal(14, 2)
   targetDate     DateTime?
   createdAt      DateTime  @default(now())
+}
+
+// A keyword rule that assigns a category by looking inside the description.
+// Used when importing a bank/wallet CSV and when re-categorising history.
+model CategoryRule {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match     String
+  category  String
+  type      String?
+  priority  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
