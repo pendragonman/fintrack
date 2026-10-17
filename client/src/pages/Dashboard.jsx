@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
-import { formatMoney, MONTH_NAMES } from "../format";
+import { formatMoney, formatCompact, MONTH_NAMES } from "../format";
 import Banner from "../components/Banner";
 import { IconWallet, IconArrowUp, IconArrowDown, IconPiggyBank } from "../components/icons";
 
@@ -137,47 +137,51 @@ function Dashboard() {
               </Link>
             </p>
           ) : (
+            /* Recharts stamps role="img" on every slice without a name, so the
+               graphic is hidden and the labelled wrapper carries the summary. */
             <div role="img" aria-label={pieLabel}>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={byCategory}
-                    dataKey="total"
-                    nameKey="category"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                  >
-                    {byCategory.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                    <Label
-                      position="center"
-                      content={({ viewBox }) => {
-                        const { cx, cy } = viewBox;
-                        return (
-                          <text x={cx} y={cy} textAnchor="middle">
-                            <tspan
-                              x={cx}
-                              dy="-0.2em"
-                              fontSize="20"
-                              fontWeight="700"
-                              fill="var(--text-h)"
-                            >
-                              {formatMoney(totalSpent, currency)}
-                            </tspan>
-                            <tspan x={cx} dy="1.5em" fontSize="12" fill="var(--text)">
-                              {topCategory}
-                            </tspan>
-                          </text>
-                        );
-                      }}
-                    />
-                  </Pie>
-                  <Tooltip formatter={(value) => formatMoney(value, currency)} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <div aria-hidden="true">
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Pie
+                      data={byCategory}
+                      dataKey="total"
+                      nameKey="category"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                    >
+                      {byCategory.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                      <Label
+                        position="center"
+                        content={({ viewBox }) => {
+                          const { cx, cy } = viewBox;
+                          return (
+                            <text x={cx} y={cy} textAnchor="middle">
+                              <tspan
+                                x={cx}
+                                dy="-0.2em"
+                                fontSize="20"
+                                fontWeight="700"
+                                fill="var(--text-h)"
+                              >
+                                {formatMoney(totalSpent, currency)}
+                              </tspan>
+                              <tspan x={cx} dy="1.5em" fontSize="12" fill="var(--text)">
+                                {topCategory}
+                              </tspan>
+                            </text>
+                          );
+                        }}
+                      />
+                    </Pie>
+                    <Tooltip formatter={(value) => formatMoney(value, currency)} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           )}
         </div>
@@ -199,7 +203,12 @@ function Dashboard() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" stroke="var(--text)" fontSize={12} />
-                <YAxis stroke="var(--text)" fontSize={12} />
+                <YAxis
+                  stroke="var(--text)"
+                  fontSize={12}
+                  width={72}
+                  tickFormatter={(value) => formatCompact(value, currency)}
+                />
                 <Tooltip formatter={(value) => formatMoney(value, currency)} />
                 <Legend />
                 <Area

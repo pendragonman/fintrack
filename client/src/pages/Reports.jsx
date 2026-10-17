@@ -171,23 +171,27 @@ function Reports() {
           </p>
         ) : (
           <div className="report-split">
+            {/* Recharts stamps role="img" on every slice without a name, so the
+                graphic is hidden and the labelled wrapper carries the summary. */}
             <div role="img" aria-label={chartLabel}>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={byCategory}
-                    dataKey="total"
-                    nameKey="category"
-                    outerRadius={110}
-                    label
-                  >
-                    {byCategory.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatMoney(value, currency)} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div aria-hidden="true">
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={byCategory}
+                      dataKey="total"
+                      nameKey="category"
+                      outerRadius={110}
+                      label
+                    >
+                      {byCategory.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatMoney(value, currency)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className="table-wrap">
