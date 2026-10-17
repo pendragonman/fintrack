@@ -1,0 +1,70 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  passwordHash           String?
+  googleId               String?   @unique
+  name                   String
+  currency               String    @default("NGN")
+  emailVerified          Boolean   @default(true)
+  verificationCode       String?
+  verificationCodeExpiry DateTime?
+  createdAt              DateTime  @default(now())
+
+  transactions Transaction[]
+  budgets      Budget[]
+  goals        SavingsGoal[]
+}
+
+model Transaction {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        TransactionType
+  amount      Decimal          @db.Decimal(14, 2)
+  category    String
+  description String?
+  date        DateTime
+  createdAt   DateTime         @default(now())
+
+  @@index([userId, date])
+  @@index([userId, category])
+}
+
+model Budget {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    String
+  limitAmount Decimal  @db.Decimal(14, 2)
+  month       Int
+  year        Int
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, category, month, year])
+}
+
+model SavingsGoal {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  targetAmount   Decimal   @db.Decimal(14, 2)
+  currentAmount  Decimal   @default(0) @db.Decimal(14, 2)
+  targetDate     DateTime?
+  createdAt      DateTime  @default(now())
+}

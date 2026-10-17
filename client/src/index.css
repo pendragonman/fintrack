@@ -1,0 +1,159 @@
+:root {
+  --text: #4b4b57;
+  --text-h: #08060d;
+  --bg: #f7f7fa;
+  --bg-soft: #ffffff;
+  --border: #e5e4e7;
+  --accent: #7c3aed;
+  --accent-rgb: 124, 58, 237;
+  --accent-bg: rgba(124, 58, 237, 0.08);
+  --accent-border: rgba(124, 58, 237, 0.35);
+  --accent-2: #0d9488;
+  --accent-2-bg: rgba(13, 148, 136, 0.1);
+  --accent-3: #d97706;
+  --accent-3-bg: rgba(217, 119, 6, 0.1);
+  --success: #16a34a;
+  --danger: #dc2626;
+  --shadow:
+    rgba(0, 0, 0, 0.08) 0 10px 15px -3px, rgba(0, 0, 0, 0.04) 0 4px 6px -2px;
+  --glow: var(--shadow);
+  --ambient: radial-gradient(
+      600px circle at 15% -10%,
+      rgba(124, 58, 237, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(500px circle at 100% 0%, rgba(13, 148, 136, 0.06), transparent 55%);
+
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+
+  font: 15px/1.6 var(--sans);
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9a9aa8;
+    --text-h: #f5f5f7;
+    --bg: #08080c;
+    --bg-soft: #111117;
+    --border: #232330;
+    --accent: #a78bfa;
+    --accent-rgb: 167, 139, 250;
+    --accent-bg: rgba(167, 139, 250, 0.12);
+    --accent-border: rgba(167, 139, 250, 0.4);
+    --accent-2: #2dd4bf;
+    --accent-2-bg: rgba(45, 212, 191, 0.12);
+    --accent-3: #fbbf24;
+    --accent-3-bg: rgba(251, 191, 36, 0.12);
+    --success: #22c55e;
+    --danger: #ef4444;
+    --shadow:
+      rgba(0, 0, 0, 0.5) 0 10px 25px -5px, rgba(0, 0, 0, 0.3) 0 8px 10px -6px;
+    --glow:
+      0 0 0 1px rgba(167, 139, 250, 0.15), 0 8px 24px -4px rgba(167, 139, 250, 0.3);
+    --ambient: radial-gradient(
+        700px circle at 15% -10%,
+        rgba(167, 139, 250, 0.16),
+        transparent 60%
+      ),
+      radial-gradient(600px circle at 100% 0%, rgba(45, 212, 191, 0.1), transparent 55%);
+  }
+}
+
+/* Explicit theme overrides — win over the OS preference in either direction */
+:root[data-theme="light"] {
+  --text: #4b4b57;
+  --text-h: #08060d;
+  --bg: #f7f7fa;
+  --bg-soft: #ffffff;
+  --border: #e5e4e7;
+  --accent: #7c3aed;
+  --accent-rgb: 124, 58, 237;
+  --accent-bg: rgba(124, 58, 237, 0.08);
+  --accent-border: rgba(124, 58, 237, 0.35);
+  --accent-2: #0d9488;
+  --accent-2-bg: rgba(13, 148, 136, 0.1);
+  --accent-3: #d97706;
+  --accent-3-bg: rgba(217, 119, 6, 0.1);
+  --success: #16a34a;
+  --danger: #dc2626;
+  --shadow:
+    rgba(0, 0, 0, 0.08) 0 10px 15px -3px, rgba(0, 0, 0, 0.04) 0 4px 6px -2px;
+  --glow: var(--shadow);
+  --ambient: radial-gradient(
+      600px circle at 15% -10%,
+      rgba(124, 58, 237, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(500px circle at 100% 0%, rgba(13, 148, 136, 0.06), transparent 55%);
+}
+
+:root[data-theme="dark"] {
+  --text: #9a9aa8;
+  --text-h: #f5f5f7;
+  --bg: #08080c;
+  --bg-soft: #111117;
+  --border: #232330;
+  --accent: #a78bfa;
+  --accent-rgb: 167, 139, 250;
+  --accent-bg: rgba(167, 139, 250, 0.12);
+  --accent-border: rgba(167, 139, 250, 0.4);
+  --accent-2: #2dd4bf;
+  --accent-2-bg: rgba(45, 212, 191, 0.12);
+  --accent-3: #fbbf24;
+  --accent-3-bg: rgba(251, 191, 36, 0.12);
+  --success: #22c55e;
+  --danger: #ef4444;
+  --shadow:
+    rgba(0, 0, 0, 0.5) 0 10px 25px -5px, rgba(0, 0, 0, 0.3) 0 8px 10px -6px;
+  --glow:
+    0 0 0 1px rgba(167, 139, 250, 0.15), 0 8px 24px -4px rgba(167, 139, 250, 0.3);
+  --ambient: radial-gradient(
+      700px circle at 15% -10%,
+      rgba(167, 139, 250, 0.16),
+      transparent 60%
+    ),
+    radial-gradient(600px circle at 100% 0%, rgba(45, 212, 191, 0.1), transparent 55%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
