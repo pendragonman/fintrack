@@ -321,8 +321,11 @@ function Transactions() {
               <tr key={t.id}>
                 <td>{t.date.slice(0, 10)}</td>
                 <td>
-                  {t.category}
-                  {t.transferGroupId && <span className="badge badge-transfer">Transfer</span>}
+                  {t.transferGroupId ? (
+                    <span className="badge badge-transfer">Transfer</span>
+                  ) : (
+                    t.category
+                  )}
                 </td>
                 <td>{t.description || "—"}</td>
                 {accounts.length > 0 && <td>{accountLabel(t)}</td>}
@@ -331,11 +334,7 @@ function Transactions() {
                 </td>
                 <td>
                   <div className="row-actions">
-                    {t.transferGroupId ? (
-                      <span className="muted">Transfer</span>
-                    ) : (
-                      <button onClick={() => openEdit(t)}>Edit</button>
-                    )}
+                    {!t.transferGroupId && <button onClick={() => openEdit(t)}>Edit</button>}
                     <button onClick={() => setPendingDelete(t)}>Delete</button>
                   </div>
                 </td>
@@ -380,9 +379,12 @@ function Transactions() {
                 <div>
                   <div className="tx-card-desc">{t.description || t.category}</div>
                   <div className="tx-card-meta">
-                    {t.category}
-                    {t.transferGroupId && <span className="badge badge-transfer">Transfer</span>} ·{" "}
-                    {t.date.slice(0, 10)}
+                    {t.transferGroupId ? (
+                      <span className="badge badge-transfer">Transfer</span>
+                    ) : (
+                      t.category
+                    )}{" "}
+                    · {t.date.slice(0, 10)}
                     {accountLabel(t) ? ` · ${accountLabel(t)}` : ""}
                   </div>
                 </div>

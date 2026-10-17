@@ -193,8 +193,6 @@ function Accounts() {
 
   return (
     <div>
-      <h2 className="sr-only">Accounts</h2>
-
       <div className="page-header">
         <h1 className="page-title">Accounts</h1>
         <div className="page-header-actions">
