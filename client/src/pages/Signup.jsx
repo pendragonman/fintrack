@@ -41,7 +41,7 @@ function Signup() {
   );
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <AuthMarketing />
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>Create your account</h1>
@@ -88,7 +88,7 @@ function Signup() {
           Already have an account? <Link to="/login">Log in</Link>
         </p>
       </form>
-    </div>
+    </main>
   );
 }
 

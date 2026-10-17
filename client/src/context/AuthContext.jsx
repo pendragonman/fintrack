@@ -21,6 +21,17 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
+  // The axios interceptor fires this when a stored token is rejected (expired
+  // or rotated) so the app can fall back to the login screen instead of
+  // rendering empty-looking pages.
+  useEffect(() => {
+    function onUnauthorized() {
+      setUser(null);
+    }
+    window.addEventListener("fintrack:unauthorized", onUnauthorized);
+    return () => window.removeEventListener("fintrack:unauthorized", onUnauthorized);
+  }, []);
+
   function applySession(data) {
     localStorage.setItem("token", data.token);
     setUser(data.user);

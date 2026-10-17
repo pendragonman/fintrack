@@ -43,7 +43,7 @@ function VerifyEmail() {
   }
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>Check your email</h1>
         <p className="auth-subtitle">
@@ -77,7 +77,7 @@ function VerifyEmail() {
           </button>
         </p>
       </form>
-    </div>
+    </main>
   );
 }
 

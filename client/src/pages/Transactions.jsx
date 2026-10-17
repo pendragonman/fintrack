@@ -1,19 +1,27 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import { formatMoney } from "../format";
 import { CATEGORIES } from "../categories";
+import Banner from "../components/Banner";
+import Modal from "../components/Modal";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { useToast } from "../components/Toast";
 
-const emptyForm = {
-  type: "EXPENSE",
-  amount: "",
-  category: CATEGORIES[3],
-  description: "",
-  date: new Date().toISOString().slice(0, 10),
-};
+function emptyForm() {
+  return {
+    type: "EXPENSE",
+    amount: "",
+    category: CATEGORIES[3],
+    description: "",
+    date: new Date().toISOString().slice(0, 10),
+  };
+}
 
 function Transactions() {
   const { user } = useAuth();
+  const { notify } = useToast();
   const currency = user?.currency || "NGN";
 
   const [items, setItems] = useState([]);
@@ -22,28 +30,78 @@ function Transactions() {
   const pageSize = 15;
 
   const [filters, setFilters] = useState({ type: "", category: "", search: "", from: "", to: "" });
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [listError, setListError] = useState("");
+
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  function load() {
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  function updateFilter(key, value) {
+    setFilters((f) => ({ ...f, [key]: value }));
+    setPage(1);
+  }
+
+  // Debounced so typing in the search box doesn't fire a request per keystroke.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters((f) => (f.search === search ? f : { ...f, search }));
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setListError("");
+
     const params = { page, pageSize };
     Object.entries(filters).forEach(([k, v]) => {
       if (v) params[k] = v;
     });
-    api.get("/transactions", { params }).then((res) => {
-      setItems(res.data.items);
-      setTotal(res.data.total);
-    });
-  }
 
-  useEffect(load, [page, filters]);
+    api
+      .get("/transactions", { params })
+      .then((res) => {
+        if (cancelled) return;
+        setItems(res.data.items);
+        setTotal(res.data.total);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setListError("We couldn’t load your transactions. Check your connection and try again.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, filters, reloadKey]);
+
+  const filtersActive = Object.values(filters).some(Boolean);
+
+  function clearFilters() {
+    setSearch("");
+    setFilters({ type: "", category: "", search: "", from: "", to: "" });
+    setPage(1);
+  }
 
   function openCreate() {
     setEditingId(null);
-    setForm(emptyForm);
-    setError("");
+    setForm(emptyForm());
+    setFormError("");
     setShowForm(true);
   }
 
@@ -56,32 +114,46 @@ function Transactions() {
       description: t.description || "",
       date: t.date.slice(0, 10),
     });
-    setError("");
+    setFormError("");
     setShowForm(true);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
+    setFormError("");
+    setSaving(true);
     const payload = { ...form, amount: parseFloat(form.amount) };
 
     try {
       if (editingId) {
         await api.put(`/transactions/${editingId}`, payload);
+        notify("Transaction updated");
       } else {
         await api.post("/transactions", payload);
+        notify("Transaction added");
       }
       setShowForm(false);
-      load();
+      setReloadKey((k) => k + 1);
     } catch (err) {
-      setError(err.response?.data?.error || "Something went wrong");
+      setFormError(err.response?.data?.error || "Something went wrong");
+    } finally {
+      setSaving(false);
     }
   }
 
-  async function handleDelete(id) {
-    if (!confirm("Delete this transaction?")) return;
-    await api.delete(`/transactions/${id}`);
-    load();
+  async function confirmDelete() {
+    setDeleting(true);
+    try {
+      await api.delete(`/transactions/${pendingDelete}`);
+      notify("Transaction deleted");
+      setPendingDelete(null);
+      if (items.length === 1 && page > 1) setPage((p) => p - 1);
+      else setReloadKey((k) => k + 1);
+    } catch (err) {
+      notify(err.response?.data?.error || "Could not delete that transaction", "error");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   async function handleExport() {
@@ -89,16 +161,25 @@ function Transactions() {
     Object.entries(filters).forEach(([k, v]) => {
       if (v) params[k] = v;
     });
-    const res = await api.get("/transactions/export", { params, responseType: "blob" });
-    const url = URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "transactions.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    try {
+      const res = await api.get("/transactions/export", { params, responseType: "blob" });
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      notify("CSV downloaded");
+    } catch {
+      notify("Export failed — try again", "error");
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, total);
+
+  const money = (t) => `${t.type === "INCOME" ? "+" : "-"}${formatMoney(t.amount, currency)}`;
 
   return (
     <div>
@@ -114,10 +195,13 @@ function Transactions() {
         </div>
       </div>
 
+      <Banner>{listError}</Banner>
+
       <div className="filters">
         <select
+          aria-label="Filter by type"
           value={filters.type}
-          onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}
+          onChange={(e) => updateFilter("type", e.target.value)}
         >
           <option value="">All types</option>
           <option value="INCOME">Income</option>
@@ -125,8 +209,9 @@ function Transactions() {
         </select>
 
         <select
+          aria-label="Filter by category"
           value={filters.category}
-          onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
+          onChange={(e) => updateFilter("category", e.target.value)}
         >
           <option value="">All categories</option>
           {CATEGORIES.map((c) => (
@@ -138,32 +223,49 @@ function Transactions() {
 
         <input
           type="date"
+          aria-label="From date"
           value={filters.from}
-          onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
+          onChange={(e) => updateFilter("from", e.target.value)}
         />
         <input
           type="date"
+          aria-label="To date"
           value={filters.to}
-          onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
+          onChange={(e) => updateFilter("to", e.target.value)}
         />
 
         <input
           type="text"
+          aria-label="Search descriptions"
           placeholder="Search description…"
-          value={filters.search}
-          onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
+
+        {filtersActive && (
+          <button type="button" className="btn btn-secondary" onClick={clearFilters}>
+            Clear filters
+          </button>
+        )}
       </div>
+
+      {items.length > 0 && (
+        <p className="muted" style={{ marginBottom: 12 }}>
+          Showing {from}–{to} of {total}
+        </p>
+      )}
 
       <div className="table-wrap">
         <table className="table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Category</th>
-              <th>Description</th>
-              <th>Amount</th>
-              <th></th>
+              <th scope="col">Date</th>
+              <th scope="col">Category</th>
+              <th scope="col">Description</th>
+              <th scope="col">Amount</th>
+              <th scope="col">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -173,25 +275,74 @@ function Transactions() {
                 <td>{t.category}</td>
                 <td>{t.description || "—"}</td>
                 <td className={t.type === "INCOME" ? "amount-positive" : "amount-negative"}>
-                  {t.type === "INCOME" ? "+" : "-"}
-                  {formatMoney(t.amount, currency)}
+                  {money(t)}
                 </td>
-                <td className="row-actions">
-                  <button onClick={() => openEdit(t)}>Edit</button>
-                  <button onClick={() => handleDelete(t.id)}>Delete</button>
+                <td>
+                  <div className="row-actions">
+                    <button onClick={() => openEdit(t)}>Edit</button>
+                    <button onClick={() => setPendingDelete(t.id)}>Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="empty-state">
-                  No transactions found.
+                <td colSpan={5}>
+                  <div className="empty-state">
+                    {loading ? (
+                      "Loading…"
+                    ) : listError ? (
+                      "Transactions unavailable."
+                    ) : filtersActive ? (
+                      <>
+                        No transactions match your filters.
+                        <button className="btn btn-secondary" onClick={clearFilters}>
+                          Clear filters
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        No transactions yet.
+                        <button className="btn btn-primary" onClick={openCreate}>
+                          + Add your first transaction
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {items.length > 0 && (
+        <div className="tx-cards">
+          {items.map((t) => (
+            <div className="tx-card" key={t.id}>
+              <div className="tx-card-top">
+                <div>
+                  <div className="tx-card-desc">{t.description || t.category}</div>
+                  <div className="tx-card-meta">
+                    {t.category} · {t.date.slice(0, 10)}
+                  </div>
+                </div>
+                <span className={t.type === "INCOME" ? "amount-positive" : "amount-negative"}>
+                  {money(t)}
+                </span>
+              </div>
+              <div className="tx-card-actions">
+                <button className="btn btn-secondary" onClick={() => openEdit(t)}>
+                  Edit
+                </button>
+                <button className="btn btn-secondary" onClick={() => setPendingDelete(t.id)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="pagination">
@@ -208,10 +359,19 @@ function Transactions() {
       )}
 
       {showForm && (
-        <div className="modal-backdrop" onClick={() => setShowForm(false)}>
-          <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
-            <h2>{editingId ? "Edit transaction" : "Add transaction"}</h2>
-            {error && <div className="auth-error">{error}</div>}
+        <Modal
+          title={editingId ? "Edit transaction" : "Add transaction"}
+          onClose={() => {
+            setShowForm(false);
+            setFormError("");
+          }}
+        >
+          <form className="modal-form" onSubmit={handleSubmit}>
+            {formError && (
+              <div className="banner banner-error" role="alert">
+                {formError}
+              </div>
+            )}
 
             <label>
               Type
@@ -274,15 +434,27 @@ function Transactions() {
                 type="button"
                 className="btn btn-secondary"
                 onClick={() => setShowForm(false)}
+                disabled={saving}
               >
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary">
-                {editingId ? "Save changes" : "Add transaction"}
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? "Saving…" : editingId ? "Save changes" : "Add transaction"}
               </button>
             </div>
           </form>
-        </div>
+        </Modal>
+      )}
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title="Delete transaction"
+          message="This transaction will be permanently removed. That can’t be undone."
+          confirmLabel="Delete"
+          busy={deleting}
+          onConfirm={confirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
       )}
     </div>
   );

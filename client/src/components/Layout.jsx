@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
@@ -24,6 +24,24 @@ function Layout() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
+  // Close the drawer with Escape, and stop the page scrolling behind it.
+  useEffect(() => {
+    if (!open) return;
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -31,18 +49,19 @@ function Layout() {
         <button
           className={`nav-toggle ${open ? "open" : ""}`}
           onClick={() => setOpen((o) => !o)}
-          aria-label="Toggle menu"
+          aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
+          aria-controls="sidebar"
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
         </button>
       </header>
 
-      <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
+      <aside id="sidebar" className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <span className="brand sidebar-brand">💰 FinTrack</span>
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Main">
           {links.map(({ to, label, end, Icon }) => (
             <NavLink
               key={to}
@@ -65,7 +84,14 @@ function Layout() {
         </div>
       </aside>
 
-      {open && <div className="sidebar-backdrop" onClick={() => setOpen(false)}></div>}
+      {open && (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label="Close menu"
+          onClick={() => setOpen(false)}
+        ></button>
+      )}
 
       <main className="content">
         <Outlet />

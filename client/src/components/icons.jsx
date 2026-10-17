@@ -8,6 +8,8 @@ function base(props) {
     strokeWidth: 1.8,
     strokeLinecap: "round",
     strokeLinejoin: "round",
+    "aria-hidden": "true",
+    focusable: "false",
     ...props,
   };
 }
