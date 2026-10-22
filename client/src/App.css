@@ -22,8 +22,11 @@
 }
 
 .brand {
+  font-family: var(--serif);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
   color: var(--text-h);
 }
 

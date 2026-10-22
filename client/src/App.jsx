@@ -16,6 +16,7 @@ import Budgets from "./pages/Budgets";
 import Goals from "./pages/Goals";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -33,7 +34,7 @@ function App() {
             <Route
               path="/"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute guestElement={<Landing />}>
                   <Layout />
                 </ProtectedRoute>
               }
