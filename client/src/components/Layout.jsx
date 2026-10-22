@@ -49,7 +49,7 @@ function Layout() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <span className="brand">cowrie</span>
+        <span className="brand">KoboPath</span>
         <button
           className={`nav-toggle ${open ? "open" : ""}`}
           onClick={() => setOpen((o) => !o)}
@@ -64,7 +64,7 @@ function Layout() {
       </header>
 
       <aside id="sidebar" className={`sidebar ${open ? "sidebar-open" : ""}`}>
-        <span className="brand sidebar-brand">cowrie</span>
+        <span className="brand sidebar-brand">KoboPath</span>
         <nav className="sidebar-nav" aria-label="Main">
           {links.map(({ to, label, end, Icon }) => (
             <NavLink

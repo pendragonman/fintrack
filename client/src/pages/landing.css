@@ -882,7 +882,7 @@
 .lp-footer-wordmark {
   margin-top: 8px;
   font-family: var(--serif);
-  font-size: clamp(88px, 27vw, 380px);
+  font-size: clamp(72px, 25vw, 420px);
   font-weight: 600;
   line-height: 0.8;
   letter-spacing: -0.05em;

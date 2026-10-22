@@ -27,7 +27,7 @@ function AuthMarketing() {
         goes.
       </h2>
       <p className="auth-marketing-sub">
-        Cowrie pulls your income, spending, budgets, and savings goals into one place — no
+        KoboPath pulls your income, spending, budgets, and savings goals into one place — no
         spreadsheets, no guessing.
       </p>
 

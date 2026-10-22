@@ -99,8 +99,8 @@ function Landing() {
   return (
     <div className="lp">
       <header className="lp-nav">
-        <a className="lp-wordmark" href="#top" aria-label="Cowrie home">
-          cowrie
+        <a className="lp-wordmark" href="#top" aria-label="KoboPath home">
+          KoboPath
         </a>
         <nav className="lp-nav-links" aria-label="Landing">
           <a href="#features">Features</a>
@@ -148,7 +148,7 @@ function Landing() {
           </div>
 
           <div className="lp-preview-wrap" id="preview">
-            <div className="lp-window" role="img" aria-label="Preview of the Cowrie dashboard">
+            <div className="lp-window" role="img" aria-label="Preview of the KoboPath dashboard">
               <div className="lp-window-bar" aria-hidden="true">
                 <span />
                 <span />
@@ -335,14 +335,14 @@ function Landing() {
 
       <footer className="lp-footer">
         <div className="lp-footer-meta">
-          <span>© {new Date().getFullYear()} Cowrie</span>
+          <span>© {new Date().getFullYear()} KoboPath</span>
           <span>Built by Abdul-Samad Owoseni</span>
           <span className="lp-footer-links">
             <Link to="/login">Log in</Link>
             <Link to="/signup">Sign up</Link>
           </span>
         </div>
-        <div className="lp-footer-wordmark" aria-hidden="true">cowrie</div>
+        <div className="lp-footer-wordmark" aria-hidden="true">KoboPath</div>
       </footer>
     </div>
   );

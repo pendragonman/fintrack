@@ -17,15 +17,15 @@ export function generateCode() {
 
 export async function sendVerificationEmail(to, name, code) {
   await transporter.sendMail({
-    from: `"Cowrie" <${process.env.GMAIL_USER}>`,
+    from: `"KoboPath" <${process.env.GMAIL_USER}>`,
     to,
     subject: `Your verification code: ${code}`,
-    text: `Hi ${name},\n\nYour Cowrie verification code is: ${code}\n\nThis code expires in 15 minutes.`,
+    text: `Hi ${name},\n\nYour KoboPath verification code is: ${code}\n\nThis code expires in 15 minutes.`,
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2>Verify your email</h2>
         <p>Hi ${name},</p>
-        <p>Your Cowrie verification code is:</p>
+        <p>Your KoboPath verification code is:</p>
         <p style="font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #0f766e;">${code}</p>
         <p style="color: #6b7280; font-size: 14px;">This code expires in 15 minutes.</p>
       </div>
@@ -35,15 +35,15 @@ export async function sendVerificationEmail(to, name, code) {
 
 export async function sendPasswordResetEmail(to, name, link) {
   await transporter.sendMail({
-    from: `"Cowrie" <${process.env.GMAIL_USER}>`,
+    from: `"KoboPath" <${process.env.GMAIL_USER}>`,
     to,
-    subject: "Reset your Cowrie password",
-    text: `Hi ${name},\n\nSomeone asked to reset the password for your Cowrie account.\n\nSet a new password here: ${link}\n\nThis link expires in 30 minutes. If you didn't request it, you can safely ignore this email — your password will not change.`,
+    subject: "Reset your KoboPath password",
+    text: `Hi ${name},\n\nSomeone asked to reset the password for your KoboPath account.\n\nSet a new password here: ${link}\n\nThis link expires in 30 minutes. If you didn't request it, you can safely ignore this email — your password will not change.`,
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2>Reset your password</h2>
         <p>Hi ${name},</p>
-        <p>Someone asked to reset the password for your Cowrie account.</p>
+        <p>Someone asked to reset the password for your KoboPath account.</p>
         <p style="margin: 24px 0;">
           <a href="${link}" style="background: #0f766e; color: #ffffff; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Set a new password</a>
         </p>
