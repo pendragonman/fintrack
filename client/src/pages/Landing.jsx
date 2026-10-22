@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   IconWallet,
@@ -96,6 +97,31 @@ const BADGES = [
 ];
 
 function Landing() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    const onPointerDown = (event) => {
+      if (!event.target.closest(".lp-nav")) setMenuOpen(false);
+    };
+    const onResize = () => {
+      if (window.innerWidth > 900) setMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("resize", onResize);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [menuOpen]);
+
   return (
     <div className="lp">
       <header className="lp-nav">
@@ -115,7 +141,36 @@ function Landing() {
             <Link className="lp-btn lp-btn-primary" to="/signup">
               Get started
             </Link>
+            <button
+              type="button"
+              className={`lp-menu-toggle${menuOpen ? " is-open" : ""}`}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              aria-controls="lp-mobile-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
           </div>
+
+          {menuOpen && (
+            <nav id="lp-mobile-menu" className="lp-mobile-menu" aria-label="Landing mobile">
+              <a href="#features" onClick={() => setMenuOpen(false)}>
+                Features
+              </a>
+              <a href="#preview" onClick={() => setMenuOpen(false)}>
+                Dashboard
+              </a>
+              <a href="#contact" onClick={() => setMenuOpen(false)}>
+                Contact
+              </a>
+              <Link className="lp-mobile-menu-login" to="/login" onClick={() => setMenuOpen(false)}>
+                Log in
+              </Link>
+            </nav>
+          )}
         </div>
       </header>
 
