@@ -1,6 +1,6 @@
 {
-  "name": "FinTrack — Personal Finance Tracker",
-  "short_name": "FinTrack",
+  "name": "Cowrie — Personal Finance Tracker",
+  "short_name": "Cowrie",
   "description": "Track spending, budgets and savings goals.",
   "start_url": "/",
   "scope": "/",

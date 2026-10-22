@@ -89,18 +89,18 @@ function Transactions() {
 }
 
 const BADGES = [
-  { Icon: IconWallet, position: "lp-badge--tl", tilt: "-12deg" },
-  { Icon: IconTransactions, position: "lp-badge--tr", tilt: "12deg" },
-  { Icon: IconBudget, position: "lp-badge--bl", tilt: "12deg" },
-  { Icon: IconGoals, position: "lp-badge--br", tilt: "-12deg" },
+  { Icon: IconWallet, position: "lp-badge--tl", label: "Accounts" },
+  { Icon: IconTransactions, position: "lp-badge--tr", label: "Transactions" },
+  { Icon: IconBudget, position: "lp-badge--bl", label: "Budgets" },
+  { Icon: IconGoals, position: "lp-badge--br", label: "Goals" },
 ];
 
 function Landing() {
   return (
     <div className="lp">
       <header className="lp-nav">
-        <a className="lp-wordmark" href="#top" aria-label="FinTrack home">
-          fintrack
+        <a className="lp-wordmark" href="#top" aria-label="Cowrie home">
+          cowrie
         </a>
         <nav className="lp-nav-links" aria-label="Landing">
           <a href="#features">Features</a>
@@ -121,14 +121,10 @@ function Landing() {
         <section className="lp-hero" aria-labelledby="lp-hero-title">
           <div className="lp-grid-bg" aria-hidden="true" />
           <div className="lp-hero-inner">
-            {BADGES.map(({ Icon, position, tilt }, i) => (
-              <span
-                key={i}
-                className={`lp-badge ${position}`}
-                style={{ transform: `rotate(${tilt})` }}
-                aria-hidden="true"
-              >
+            {BADGES.map(({ Icon, position, label }, i) => (
+              <span key={i} className={`lp-badge ${position}`} aria-hidden="true">
                 <Icon />
+                <span className="lp-badge-label">{label}</span>
               </span>
             ))}
 
@@ -152,7 +148,7 @@ function Landing() {
           </div>
 
           <div className="lp-preview-wrap" id="preview">
-            <div className="lp-window" role="img" aria-label="Preview of the FinTrack dashboard">
+            <div className="lp-window" role="img" aria-label="Preview of the Cowrie dashboard">
               <div className="lp-window-bar" aria-hidden="true">
                 <span />
                 <span />
@@ -282,20 +278,8 @@ function Landing() {
           <div className="lp-final-inner">
             <span className="lp-eyebrow">Start today</span>
             <h2 id="lp-cta-title" className="lp-cta-title">
-              Take control of your{" "}
-              <span className="lp-circled">
-                finances
-                <svg className="lp-circle" viewBox="0 0 320 110" preserveAspectRatio="none" aria-hidden="true">
-                  <path
-                    d="M18 62c42-34 118-48 190-38 44 6 78 24 88 42 6 11-6 22-34 27-56 10-158 6-208-12-15-6-22-14-20-21 2-8 12-15 28-20"
-                    fill="none"
-                    stroke="var(--lp-mint)"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>{" "}
-              before it controls you.
+              Take control of your <span className="lp-mark">finances</span> before it controls
+              you.
             </h2>
             <p className="lp-final-sub">
               Set up in two minutes. Your first month of clarity is free.
@@ -351,14 +335,14 @@ function Landing() {
 
       <footer className="lp-footer">
         <div className="lp-footer-meta">
-          <span>© {new Date().getFullYear()} FinTrack</span>
+          <span>© {new Date().getFullYear()} Cowrie</span>
           <span>Built by Abdul-Samad Owoseni</span>
           <span className="lp-footer-links">
             <Link to="/login">Log in</Link>
             <Link to="/signup">Sign up</Link>
           </span>
         </div>
-        <div className="lp-footer-wordmark" aria-hidden="true">fintrack</div>
+        <div className="lp-footer-wordmark" aria-hidden="true">cowrie</div>
       </footer>
     </div>
   );

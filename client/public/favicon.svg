@@ -1,18 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="line" x1="10" y1="44" x2="54" y2="18" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0f766e" />
-      <stop offset="1" stop-color="#2dd4bf" />
-    </linearGradient>
-  </defs>
   <rect width="64" height="64" rx="15" fill="#0a0a0a" />
-  <path
-    d="M10 45 23.5 34.5 33 41 54 18"
-    fill="none"
-    stroke="url(#line)"
-    stroke-width="5"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <circle cx="54" cy="18" r="4.5" fill="#a8f26a" />
+  <ellipse cx="32" cy="32" rx="13.5" ry="21" fill="none" stroke="#2dd4bf" stroke-width="3.5" />
+  <path d="M32 13c-4.6 5.2-4.6 32.8 0 38" fill="none" stroke="#2dd4bf" stroke-width="2.4" stroke-linecap="round" opacity="0.5" />
+  <path d="M32 13c4.6 5.2 4.6 32.8 0 38" fill="none" stroke="#2dd4bf" stroke-width="2.4" stroke-linecap="round" opacity="0.5" />
+  <g stroke="#a8f26a" stroke-width="2.4" stroke-linecap="round">
+    <path d="M26.5 21h-4" />
+    <path d="M26.5 27.5h-5" />
+    <path d="M26.5 34h-5" />
+    <path d="M26.5 40.5h-4" />
+    <path d="M37.5 21h4" />
+    <path d="M37.5 27.5h5" />
+    <path d="M37.5 34h5" />
+    <path d="M37.5 40.5h4" />
+  </g>
 </svg>

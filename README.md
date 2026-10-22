@@ -1,4 +1,4 @@
-# FinTrack — Personal Finance Tracker
+# Cowrie — Personal Finance Tracker
 
 A full-stack personal finance tracker for recording income and expenses, setting monthly budgets, and working toward savings goals — with charts, CSV export, and email/Google sign-in.
 

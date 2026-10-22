@@ -30,7 +30,7 @@
     radial-gradient(500px circle at 100% 0%, rgba(77, 124, 15, 0.05), transparent 55%);
 
   --sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
-  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
 
   font: 15px/1.6 var(--sans);
   color-scheme: light dark;
