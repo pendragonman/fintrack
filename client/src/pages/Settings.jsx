@@ -86,7 +86,10 @@ function Settings() {
 
       <div className="panel settings-form" style={{ marginTop: 20 }}>
         <h2 className="panel-title">Appearance</h2>
-        <ThemeToggle />
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <ThemeToggle />
+          <span style={{ fontSize: 13 }}>Switch between light and dark</span>
+        </div>
       </div>
 
       <div className="panel settings-form" style={{ marginTop: 20 }}>

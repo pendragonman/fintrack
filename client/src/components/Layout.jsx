@@ -50,21 +50,27 @@ function Layout() {
     <div className="app-shell">
       <header className="topbar">
         <span className="brand">KoboPath</span>
-        <button
-          className={`nav-toggle ${open ? "open" : ""}`}
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          aria-controls="sidebar"
-        >
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </button>
+        <div className="topbar-actions">
+          <ThemeToggle />
+          <button
+            className={`nav-toggle ${open ? "open" : ""}`}
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="sidebar"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
       </header>
 
       <aside id="sidebar" className={`sidebar ${open ? "sidebar-open" : ""}`}>
-        <span className="brand sidebar-brand">KoboPath</span>
+        <div className="sidebar-head">
+          <span className="brand sidebar-brand">KoboPath</span>
+          <ThemeToggle />
+        </div>
         <nav className="sidebar-nav" aria-label="Main">
           {links.map(({ to, label, end, Icon }) => (
             <NavLink
@@ -80,7 +86,6 @@ function Layout() {
           ))}
         </nav>
         <div className="sidebar-footer">
-          <ThemeToggle />
           <span className="sidebar-user">{user?.name}</span>
           <button className="btn btn-secondary" onClick={logout}>
             Log out

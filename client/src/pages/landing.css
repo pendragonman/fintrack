@@ -58,20 +58,41 @@
   line-height: 1;
 }
 
+.lp-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-left: auto;
+}
+
 .lp-nav-links {
   display: flex;
-  gap: 26px;
+  align-items: center;
+  gap: 4px;
   font-size: 13.5px;
   color: #8b8b93;
 }
 
 .lp-nav-links a {
+  padding: 8px 12px;
+  border-radius: 999px;
   text-decoration: none;
-  transition: color 0.18s ease;
+  transition: color 0.18s ease, background 0.18s ease, transform 0.12s ease;
 }
 
 .lp-nav-links a:hover {
   color: var(--lp-head);
+  background: #1a1a1e;
+}
+
+.lp-nav-links a:active {
+  color: var(--lp-mint);
+  transform: scale(0.96);
+}
+
+.lp-nav-links a:focus-visible {
+  outline: 2px solid var(--lp-mint);
+  outline-offset: 2px;
 }
 
 .lp-nav-actions {
@@ -123,6 +144,15 @@
 .lp-btn-ghost:hover {
   border-color: rgba(45, 212, 191, 0.45);
   color: var(--lp-mint) !important;
+}
+
+.lp-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.lp-btn:focus-visible {
+  outline: 2px solid var(--lp-mint);
+  outline-offset: 3px;
 }
 
 /* --- Shared bits --------------------------------------------------------- */
@@ -586,6 +616,10 @@
   grid-column: span 3;
 }
 
+.lp-card > .lp-mock {
+  flex: 1 1 auto;
+}
+
 .lp-card h3 {
   margin: 8px 0 0;
   font-size: 16.5px;
@@ -713,7 +747,10 @@
 
 /* Report mock */
 .lp-report-spark {
-  height: 72px;
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto;
+  min-height: 84px;
   margin: 0;
 }
 

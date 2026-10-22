@@ -102,18 +102,20 @@ function Landing() {
         <a className="lp-wordmark" href="#top" aria-label="KoboPath home">
           KoboPath
         </a>
-        <nav className="lp-nav-links" aria-label="Landing">
-          <a href="#features">Features</a>
-          <a href="#preview">Dashboard</a>
-          <a href="#contact">Contact</a>
-        </nav>
-        <div className="lp-nav-actions">
-          <Link className="lp-btn lp-btn-ghost" to="/login">
-            Log in
-          </Link>
-          <Link className="lp-btn lp-btn-primary" to="/signup">
-            Get started
-          </Link>
+        <div className="lp-nav-right">
+          <nav className="lp-nav-links" aria-label="Landing">
+            <a href="#features">Features</a>
+            <a href="#preview">Dashboard</a>
+            <a href="#contact">Contact</a>
+          </nav>
+          <div className="lp-nav-actions">
+            <Link className="lp-btn lp-btn-ghost" to="/login">
+              Log in
+            </Link>
+            <Link className="lp-btn lp-btn-primary" to="/signup">
+              Get started
+            </Link>
+          </div>
         </div>
       </header>
 
