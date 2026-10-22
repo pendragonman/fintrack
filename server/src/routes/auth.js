@@ -52,8 +52,9 @@ const resetLimiter = rateLimit({
 // login, verification and password resets all agree on the stored form.
 const emailField = z
   .string()
+  .trim()
   .email()
-  .transform((value) => value.trim().toLowerCase());
+  .transform((value) => value.toLowerCase());
 
 const signupSchema = z.object({
   name: z.string().min(1).max(80),
