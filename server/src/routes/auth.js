@@ -48,24 +48,31 @@ const resetLimiter = rateLimit({
   message: "Too many attempts. Try again in a few minutes.",
 });
 
+// Emails are case-insensitive. Normalize (and trim) at the edge so signup,
+// login, verification and password resets all agree on the stored form.
+const emailField = z
+  .string()
+  .email()
+  .transform((value) => value.trim().toLowerCase());
+
 const signupSchema = z.object({
   name: z.string().min(1).max(80),
-  email: z.string().email(),
+  email: emailField,
   password: z.string().min(8).max(100),
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: emailField,
   password: z.string().min(1),
 });
 
 const verifySchema = z.object({
-  email: z.string().email(),
+  email: emailField,
   code: z.string().min(6).max(6),
 });
 
 const resendSchema = z.object({
-  email: z.string().email(),
+  email: emailField,
 });
 
 const googleSchema = z.object({
@@ -73,7 +80,7 @@ const googleSchema = z.object({
 });
 
 const forgotSchema = z.object({
-  email: z.string().email(),
+  email: emailField,
   // The browser sends its own origin so reset links come back to the right host
   // (production vs. localhost). Anything not on the allow-list is ignored.
   origin: z.string().url().optional(),
@@ -153,7 +160,11 @@ router.post(
     }
     const { email, password } = parsed.data;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    // Match case-insensitively: older rows may have been stored with mixed
+    // case before emails were normalized at signup.
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+    });
     if (!user || !user.passwordHash) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
